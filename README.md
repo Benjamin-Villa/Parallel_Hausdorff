@@ -1,17 +1,16 @@
-# Parallel_HSD_K2: Implementación Paralela Ingenua ("Embarrassing") de HDKP1 con SYCL
+# Distancia de Hausdorff Paralela "Naive", basado en HDKP1, implementado con SYCL
 
-Implementación paralela ingenua (*embarrassingly parallel*) del algoritmo **HDKP1** para el cálculo de distancia de Hausdorff (dirigida y simétrica) sobre conjuntos de puntos 2D representados mediante $k^2$-trees (`MREP2`).
+Implementación paralela "embarazosa" del algoritmo **HDKP1** para el cálculo de distancia de Hausdorff (dirigida y simétrica) sobre conjuntos de puntos 2D representados mediante $k^2$-trees (`MREP2`).
 
 ---
 
-## Concepto de la Implementación Ingenua
+## Concepto de la Implementación 
 
 Esta versión corresponde al reemplazo directo del ciclo secuencial `for (p in A)` por una ejecución paralela:
 
 1. **Extracción de Puntos**: Se extraen los puntos de $K_A$ a un arreglo/vector plano mediante `extractPointK2tree(A, 0)`.
 2. **Paralelización del Ciclo**: Se divide el rango de puntos $[0, N)$ estáticamente entre los workers (`std::async`).
-3. **`NNMAX` como Caja Negra**: Se invoca directamente la función secuencial original `nnMax` (`src/seq/NNMAX.cpp`) **sin ninguna modificación interna**.
-4. **Caché Privada $p_{NN}$**: Cada worker mantiene su propio punto de referencia local $p_{NN}$ para aplicar la Regla de Poda 1 ($\text{dist}(p, p_{NN}) \le cmax$).
+3. **`NNMAX` en distintos workers**: Se invoca directamente la función secuencial original `nnMax` (`src/seq/NNMAX.cpp`)
 5. **Cota Global Atómica `cmax`**: Variable en memoria compartida (USM de SYCL) actualizada asincrónicamente mediante `sycl::atomic_ref<double, sycl::memory_order::relaxed>::fetch_max`.
 
 ---
